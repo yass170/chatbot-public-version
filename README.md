@@ -1,31 +1,135 @@
-# Chatbot — version publique
+# Chatbot — Document Knowledge Assistant
 
-Interface conversationnelle pour accéder à des informations et échanger avec un assistant.
+A document assistant that answers questions about an organization’s knowledge base and connects each answer to the relevant source passages.
 
-## Confidentialité et anonymisation
+Employees can ask a question in natural language instead of searching through folders and reading entire documents. Answers arrive progressively, with citations that open the source document at the relevant page. Knowledge is organized into workspaces with controlled access.
 
-Ce dépôt est une présentation publique de la structure du projet. **Tous les contenus d’origine des fichiers conservés ont été supprimés pour des raisons de confidentialité.** Les fichiers de code, de configuration, de migration SQL, de tests, de gouvernance et les artefacts d’ingénierie conservés contiennent uniquement la phrase « Contenu anonymisé ». Cette règle s’applique aussi aux exemples et aux modèles.
+## Users
 
-Les données, secrets, fichiers binaires, dépendances embarquées, résultats générés, wireframes, journaux et dossiers de documentation de work ont été exclus. Les dossiers `.agent` et `.agents`, les fichiers `AGENTS.md` et les métadonnées Git d’origine sont absents. Les noms susceptibles de révéler une entreprise, une personne, un client ou un système interne ont été remplacés par des noms génériques.
+| Role | Use |
+|---|---|
+| Employees | Ask questions, inspect sources, browse documents and manage their conversations. |
+| Administrators | Manage workspace access, document sources, model providers and operational monitoring. |
 
-Seuls ce README et les présentations d’architecture ont un contenu explicatif : ces textes ont été entièrement rédigés pour cette version publique, sans reprendre les détails internes. L’historique Git public commence avec cette version anonymisée.
+## Main features
 
-## Fonctionnement général
+- **Document-grounded conversations.** Ask follow-up questions and read answers alongside the material used to produce them.
+- **Source inspection.** Open cited pages and passages in a document viewer rather than relying on an unsupported answer.
+- **Workspace-based knowledge.** Keep document collections and user access aligned with distinct working contexts.
+- **Document ingestion.** Index material from a read-only shared source or an administrator’s manual import.
+- **Conversation tools.** Use attachments, conversation search, exports and personal preferences.
+- **Administration.** Configure models and review processing failures, usage, latency and activity.
 
-L’arborescence sépare les composants d’interface, les traitements applicatifs, les éléments de configuration et les tests lorsqu’ils sont présents. Le parcours général relie une interface à des traitements et à une couche de données. Les contrats, règles métier, schémas de données, intégrations et paramètres internes ne sont pas décrits.
+## Typical workflow
 
-Formats techniques représentés : Python, TypeScript, JavaScript, HTML, CSS, scripts shell, configuration textuelle.
+1. Choose an accessible workspace and ask a question.
+2. Retrieve relevant passages from the indexed documents.
+3. Read the streamed answer and open its citations.
+4. Continue the conversation or inspect the source documents directly.
 
-La copie permet de parcourir l’organisation technique et d’identifier les familles de composants. **Elle ne permet ni d’exécuter ni de reconstruire le projet.** Les configurations et les migrations sont volontairement incomplètes et ne doivent pas être lancées.
+## Project structure
 
-## Organisation
+```text
+chatbot-public-version/
+├── backend/
+│   ├── src/
+│   │   └── assistant/
+│   │       ├── access/
+│   │       ├── conversations/
+│   │       ├── core/
+│   │       ├── documents/
+│   │       ├── identity/
+│   │       ├── knowledge/
+│   │       ├── models/
+│   │       ├── module-003/
+│   │       ├── module-012/
+│   │       ├── module-018/
+│   │       ├── settings/
+│   │       ├── spaces/
+│   │       ├── supervision/
+│   │       ├── usage/
+│   │       └── app.py
+│   ├── tests/
+│   │   └── unit/
+│   └── pyproject.toml
+├── deploy/
+│   ├── db/
+│   │   └── initdb/
+│   ├── migration/
+│   ├── module-007/
+│   │   ├── identity-portal/
+│   │   │   └── README.md
+│   │   └── provider/
+│   │       └── README.md
+│   ├── scripts/
+│   └── README.md
+├── docs/
+│   ├── decisions/
+│   │   └── README.md
+│   ├── design/
+│   │   ├── decisions.md
+│   │   ├── requirements.md
+│   │   └── verification.md
+│   ├── integration/
+│   ├── issues/
+│   │   ├── epics/
+│   │   ├── features/
+│   │   ├── tasks/
+│   │   └── README.md
+│   ├── module-004/
+│   │   └── README.md
+│   ├── module-017/
+│   ├── operations/
+│   │   └── README.md
+│   ├── rag/
+│   │   └── README.md
+│   ├── security/
+│   └── specifications/
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── api/
+│   │   ├── auth/
+│   │   ├── buildplugins/
+│   │   ├── components/
+│   │   ├── lib/
+│   │   ├── module-008/
+│   │   ├── module-012/
+│   │   ├── pages/
+│   │   ├── shell/
+│   │   ├── styles/
+│   │   ├── test/
+│   │   └── theme/
+│   ├── tests/
+│   │   └── e2e/
+│   └── package.json
+├── ARCHITECTURE.md
+└── README.md
+```
 
-- `.dockerignore`
-- `backend/`
-- `deploy/`
-- `docs/`
-- `frontend/`
+[Complete directory structure](docs/design/structure.md)
 
-Les noms `module-…` et `fichier-…` désignent des éléments renommés. Les extensions des fichiers textuels conservés indiquent leur format d’origine.
+| Area | Responsibility |
+|---|---|
+| Web interface | React and TypeScript conversation, document-viewing and administration screens. |
+| Application API | Python/FastAPI services for conversations, permissions and document access. |
+| Background worker | Document ingestion, indexing and scheduled processing. |
+| Knowledge storage | PostgreSQL with vector search, document metadata and private document files. |
+| Model adapters | Server-side interfaces to language, embedding and document-processing models. |
 
-Consulter [ARCHITECTURE.md](ARCHITECTURE.md) pour la présentation générale.
+## Technology
+
+React, TypeScript, Vite, Python, FastAPI, PostgreSQL, pgvector and Docker.
+
+## Engineering
+
+- [Architecture](ARCHITECTURE.md)
+- [Product requirements](docs/design/requirements.md)
+- [Design decisions](docs/design/decisions.md)
+- [Verification strategy](docs/design/verification.md)
+
+An answer is an interpretation of the available sources; citations and direct document inspection remain part of the user’s workflow.
+
+---
+
+Source code, operational configuration and project-specific data are withheld for confidentiality.
